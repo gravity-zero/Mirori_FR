@@ -85,7 +85,7 @@ class identify:
 #miror_snapshot=identify("realsense", "face_encodings.npy", "face_names.npy")
 #miror_snapshot=identify("https://www.youtube.com/watch?v=m_xWEofOqHI", "face_encodings.npy", "face_names.npy")
 #miror_snapshot=identify("csi", "face_encodings.npy", "face_names.npy")
-miror_snapshot=identify("file:images_to_test/toto.jpg", "face_encodings.npy", "face_names.npy")
+miror_snapshot=identify("file:images_to_test/tm.jpg", "face_encodings.npy", "face_names.npy")
 
 while True:
     miror_snapshot.read()
