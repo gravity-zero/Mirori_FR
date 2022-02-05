@@ -1,12 +1,8 @@
-from tkinter.ttk import Style
-
 import face_recognition
 import cv2
 import numpy as np
 import os
-import time
 from sty import fg, bg, ef, rs, Style, RgbFg
-
 
 class identify:
     font = cv2.FONT_HERSHEY_DUPLEX
