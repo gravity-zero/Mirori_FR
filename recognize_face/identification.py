@@ -31,9 +31,9 @@ class identify:
             quit()
         self.known_face_encodings = np.load(embedding_file)
         self.known_face_names = np.load(name_file)
-        print("Fichier Trouvé", embedding_file)
+        print("Fichiers Trouvés", embedding_file, name_file)
 
-        if entree.split(':')[0] == "file":
+        if entree.split(':')[0] == "file_location":
             fichier = entree.split(':')[1]
             if not os.path.exists(fichier):
                 print("Fichier", fichier, "non trouvé")
@@ -78,25 +78,26 @@ class identify:
             self.face_names.append(name)
             self.face_distances.append(np.min(distances))
 
+#We need to init this program from the program where we take de screenshot sample
+mirror_snapshot = identify("file_location:images_to_test/lf.jpg", "face_encodings.npy", "face_names.npy")
 
-mirror_snapshot = identify("file:images_to_test/den1.jpg", "face_encodings.npy", "face_names.npy")
-
-while True:
-    mirror_snapshot.read()
-    mirror_snapshot.analyse()
-    print("STARTING RECOGNIZE PROGRAM")
-    i = 1
-    for name, distance in zip(mirror_snapshot.face_names, mirror_snapshot.face_distances):
-        if mirror_snapshot.face_names and len(mirror_snapshot.face_names) == 1:
-            distance_color = fg.green + str(round(distance, 2)) + fg.rs if distance > 0.4 else (
-                fg.yellow + str(round(distance, 2)) + fg.rs if distance > 0.3 else fg.orange + str(
-                    round(distance, 2)) + fg.rs)
-            print("RESULT-> ", fg.green + name + fg.rs)
-            print('distance:', distance_color)
-        else:
-            if i == 1:
-                print(fg.red + "ERROR MORE THAN ONE FACE TO COMPARE" + fg.rs)
-            print("RESULT "+str(i)+":", fg.green + name + fg.rs if name != "Inconnu" else fg.red + name + fg.rs)
-            i += 1
-    print("ENDING RECOGNIZE PROGRAM")
-    quit()
+mirror_snapshot.read()
+mirror_snapshot.analyse()
+print("STARTING RECOGNIZE PROGRAM")
+i = 1
+for name, distance in zip(mirror_snapshot.face_names, mirror_snapshot.face_distances):
+    #Check if we have more than one face
+    if mirror_snapshot.face_names and len(mirror_snapshot.face_names) == 1:
+        distance_color = fg.orange + str(round(distance, 2)) + fg.rs if distance > 0.5 else (
+            fg.yellow + str(round(distance, 2)) + fg.rs if distance > 0.4 else fg.green + str(
+                round(distance, 2)) + fg.rs)
+        print("RESULT-> ", fg.green + name + fg.rs)
+        print('distance:', distance_color)
+    else:
+        #We have more than one face to compare, we need to take a new screenshot
+        if i == 1:
+            print(fg.red + "ERROR MORE THAN ONE FACE TO COMPARE" + fg.rs)
+        print("RESULT "+str(i)+":", fg.green + name + fg.rs if name != "Inconnu" else fg.red + name + fg.rs)
+        i += 1
+print("ENDING RECOGNIZE PROGRAM")
+quit()
