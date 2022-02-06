@@ -25,7 +25,7 @@ video_capture = cv2.VideoCapture(0)
 
 face_locations = []
 
-ID=1 #API CALL 
+id=1 #API CALL 
 while True:
     # Grab a single frame of video
     ret, frame = video_capture.read()  # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
@@ -46,13 +46,16 @@ while True:
         # SPACE pressed for Screenshot
         img_name = "identity.png"
         parent_folder = "../identified/"
-        folder = ID
+        folder = id
         path = os.path.join(parent_folder, str(folder))
         os.mkdir(path, 0o777)
-        print(path + img_name)
-        cv2.imwrite(path + img_name, frame)
+        cv2.imwrite(path +'/'+ img_name, frame)
         video_capture.release()
         cv2.destroyAllWindows()
-        ID+=1
-        print(format(img_name))
+
+        id+=1
+        import prepare_embedding as pe
+
+        pe.encoding_image(parent_folder)
+        
         break
