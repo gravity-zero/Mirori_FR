@@ -2,7 +2,8 @@ import face_recognition
 import cv2
 import numpy as np
 import os
-from sty import fg, bg, ef, rs, Style, RgbFg
+from sty import fg, RgbFg, Style
+
 
 class identify:
     font = cv2.FONT_HERSHEY_DUPLEX
@@ -31,6 +32,7 @@ class identify:
 
         if entree.split(':')[0] == "file_location":
             fichier = entree.split(':')[1]
+            print(os.curdir)
             if not os.path.exists(fichier):
                 print("Fichier", fichier, "non trouvé")
                 quit()
@@ -74,26 +76,4 @@ class identify:
             self.face_names.append(name)
             self.face_distances.append(np.min(distances))
 
-#We need to init this program from the program where we take de screenshot sample
-mirror_snapshot = identify("file_location:images_to_test/lf.jpg", "face_encodings.npy", "face_names.npy")
 
-mirror_snapshot.read()
-mirror_snapshot.analyse()
-print("STARTING RECOGNIZE PROGRAM")
-i = 1
-for name, distance in zip(mirror_snapshot.face_names, mirror_snapshot.face_distances):
-    #Check if we have more than one face
-    if mirror_snapshot.face_names and len(mirror_snapshot.face_names) == 1:
-        distance_color = fg.orange + str(round(distance, 2)) + fg.rs if distance > 0.5 else (
-            fg.yellow + str(round(distance, 2)) + fg.rs if distance > 0.4 else fg.green + str(
-                round(distance, 2)) + fg.rs)
-        print("RESULT-> ", fg.green + name + fg.rs)
-        print('distance:', distance_color)
-    else:
-        #We have more than one face to compare, we need to take a new screenshot
-        if i == 1:
-            print(fg.red + "ERROR MORE THAN ONE FACE TO COMPARE" + fg.rs)
-        print("RESULT "+str(i)+":", fg.green + name + fg.rs if name != "Inconnu" else fg.red + name + fg.rs)
-        i += 1
-print("ENDING RECOGNIZE PROGRAM")
-quit()
