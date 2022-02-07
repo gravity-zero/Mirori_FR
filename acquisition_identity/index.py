@@ -2,7 +2,6 @@ import cv2
 import face_recognition
 import sys 
 import os
-import sys
 
 sys.path.append('../')
 
@@ -26,6 +25,8 @@ video_capture = cv2.VideoCapture(0)
 face_locations = []
 
 id=1 #API CALL 
+print("SPACE BAR FOR TAKING A REFERENCE FACE IMAGE")
+print("ESC FOR EXIT")
 while True:
     # Grab a single frame of video
     ret, frame = video_capture.read()  # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
@@ -37,6 +38,7 @@ while True:
         cv2.imshow('Video', frame)
         
     key = cv2.waitKey(1)
+    
     if key & key % 256 == 27:
         # ESC pressed for Quit
         video_capture.release()
@@ -46,16 +48,22 @@ while True:
         # SPACE pressed for Screenshot
         img_name = "identity.png"
         parent_folder = "../identified/"
-        folder = id
-        path = os.path.join(parent_folder, str(folder))
-        os.mkdir(path, 0o777)
-        cv2.imwrite(path +'/'+ img_name, frame)
+        folder = str(id) + "/"
+        path = os.path.join(parent_folder, folder)
+        filename = path + img_name
+        if not os.path.exists(filename):
+            os.mkdir(path, 0o755)
+        cv2.imwrite(path + img_name, frame)
         video_capture.release()
         cv2.destroyAllWindows()
 
-        id+=1
-        import prepare_embedding as pe
+        if os.path.exists(filename):
+            import prepare_embedding as pe
 
-        pe.encoding_image(parent_folder)
-        
+            pe.encoding_image(parent_folder)
+            print("REFERENCE IMAGE TAKEN for", id)
+            id+=1
+        else:
+            print("IMAGE DOESN'T EXISTS, SOMETHING WENT WRONG")
         break
+    
