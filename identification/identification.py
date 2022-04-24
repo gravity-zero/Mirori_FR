@@ -1,12 +1,12 @@
 import face_recognition
-import cv2
+from cv2 import VideoCapture, FONT_HERSHEY_DUPLEX, resize
 import numpy as np
 import os
 from sty import fg, RgbFg, Style
 
 
 class identify:
-    font = cv2.FONT_HERSHEY_DUPLEX
+    font = FONT_HERSHEY_DUPLEX
     color = (255, 255, 255)
     fg.orange = Style(RgbFg(255, 150, 50))
 
@@ -36,7 +36,7 @@ class identify:
             if not os.path.exists(fichier):
                 print("Fichier", fichier, "non trouvé")
                 quit()
-            self.video_capture = cv2.VideoCapture(fichier)
+            self.video_capture = VideoCapture(fichier)
         else:
             print("Entree inconnue")
             quit()
@@ -57,7 +57,7 @@ class identify:
         frame = self.frame
         if (frame is not None) and (frame.shape[1] > self.width_max):
             self.ratio = self.width_max / frame.shape[1]
-            frame_to_analyse = cv2.resize(frame, (0, 0), fx=self.ratio, fy=self.ratio)
+            frame_to_analyse = resize(frame, (0, 0), fx=self.ratio, fy=self.ratio)
         else:
             self.ratio = 1
             frame_to_analyse = frame

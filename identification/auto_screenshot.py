@@ -1,21 +1,26 @@
-import cv2
+
+from cv2 import VideoCapture, imwrite, destroyAllWindows, CAP_V4L2
+import time
 import face_recognition
 import os
-import time
+
 
 def screenshot():
-    video_capture = cv2.VideoCapture(0)
+    #print(cv2.getBuildInformation())
+    video_capture = VideoCapture(CAP_V4L2)
 
     face_locations = []
 
-    while video_capture:
+    while True:
         # Grab a single frame of video
+        
         ret, frame = video_capture.read()  # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+        
+        #time.sleep(0.100)
         rgb_frame = frame[:, :, ::-1]  # Find all the faces in the current frame of video
         face_locations = face_recognition.face_locations(rgb_frame)  # Display the results
         print(face_locations)
-        time.sleep(0.500)
-
+        
         #Wait before taking face screenshot
         img_name = "identity.png"
         parent_folder = "images_to_test/"
@@ -24,8 +29,8 @@ def screenshot():
         
         if os.path.exists(filename):
             os.remove(filename)
-        cv2.imwrite(filename, frame)
+        imwrite(filename, frame)
         video_capture.release()
-        cv2.destroyAllWindows()
+        destroyAllWindows()
         return "SCREENSHOT TAKEN"
         
