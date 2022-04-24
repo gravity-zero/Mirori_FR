@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 load_dotenv("../.env")
 
 mySSHP = getenv('ssh_keygen')
-mySSHK = path.relpath('../../../../.ssh/ovh.pub')
+
+mySSHK = path.abspath('/home/grav/.ssh/ovh')
 
 def ssh_connection():
     ssh_client = SSHClient()
@@ -43,8 +44,8 @@ def scp_download(file_to_dl, directory):
         i=0
         for file in files.split("\n"):
             scp = scp_connection()
-            scp.get(file, directory)
+            scp.get(file, directory+file)
             i+=1
     else:
         scp = scp_connection()
-        scp.get(file_to_dl, directory)
+        scp.get(file_to_dl, directory+file_to_dl)

@@ -6,7 +6,7 @@ import os
 sys.path.append('../')
 
 #from services import ssh
-from services import ssh_scp as conn
+#from services import ssh_scp as conn
 
 ############### UPLOAD ##################
 
@@ -20,7 +20,12 @@ from services import ssh_scp as conn
 
 ##################################################################
 
-video_capture = cv2.VideoCapture(0)
+#video_capture =cv2.VideoCapture(0)
+
+video_capture = cv2.VideoCapture(cv2.CAP_V4L2)
+#video_capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
+#video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+#video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
 
 face_locations = []
 
@@ -28,7 +33,6 @@ id=1 #API CALL
 print("SPACE BAR FOR TAKING A REFERENCE FACE IMAGE")
 print("ESC FOR EXIT")
 while True:
-    # Grab a single frame of video
     ret, frame = video_capture.read()  # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_frame = frame[:, :, ::-1]  # Find all the faces in the current frame of video
     face_locations = face_recognition.face_locations(rgb_frame)  # Display the results
