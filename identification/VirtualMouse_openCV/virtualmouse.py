@@ -2,6 +2,7 @@ import HandTrackingModule as htm
 import cv2 as cv
 import numpy as np
 import autopy
+import os
 ###########################
 wCam , hCam = 640,480
 wScr , hScr =autopy.screen.size()
@@ -29,8 +30,10 @@ def Mouse(img):
     # finding hands
     detector.findhands(img)
     lmlist, bbox = detector.findPosition(img)
+    print("POSITION de Départ \n")
+    print(autopy.mouse.location)
 
-    cv.rectangle(img, (frameR, frameR), (wCam - frameR, hCam - frameR), (255, 0, 255), 2)
+    # cv.rectangle(img, (frameR, frameR), (wCam - frameR, hCam - frameR), (255, 0, 255), 2)
 
     # 2. get the tip of index and midel finger
     if len(lmlist) != 0:
@@ -47,7 +50,11 @@ def Mouse(img):
             clocX = plocX + (xMOUSE - plocX) / smootheing
             clocY = plocY + (yMOUSE - plocY) / smootheing
             # 7. move mouse
+            print("MOUSE START")
             autopy.mouse.move(clocX, clocY)
+            print(autopy.screen.is_point_visible)
+            print("MOUSE END")
+
             cv.circle(img, (Xindex, Yindex), 15, (20, 180, 90), cv.FILLED)
             plocY, plocX = clocY, clocX
 
@@ -68,13 +75,16 @@ def main():
         img = cv.flip(img, 1)
 
         img = Mouse(img)
-
         # 11. display
 
-        cv.imshow("result", img)
+        #cv.imshow("result", img)
         
-        if cv.waitKey(1) & cv.waitKey(1) % 256 == 27:
+        if cv.waitKey(1) & cv.waitKey(1) % 256 == 27 :
         # ESC pressed for Quit
+            cap.release()
+            cv.destroyAllWindows()
+            break
+        elif cv.waitKey(1) & cv.waitKey(1) % 256 == 32:
             cap.release()
             cv.destroyAllWindows()
             break

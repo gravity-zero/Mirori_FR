@@ -20,12 +20,8 @@ sys.path.append('../')
 
 ##################################################################
 
-#video_capture =cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(0)
 
-video_capture = cv2.VideoCapture(cv2.CAP_V4L2)
-#video_capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
-#video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
-#video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
 
 face_locations = []
 
