@@ -3,11 +3,12 @@ import identification as ident
 import auto_screenshot as ascreen
 from sty import fg
 import requests
+
 from os import path, system
 
 import sys
 #sys.path.append('../')
-from services import ssh_scp as conn
+from services import ssh_scp as conn, virtualmouse as virtual
 
 def launch(test=0):
     if test < 3:
@@ -33,6 +34,9 @@ def launch(test=0):
                                 round(distance, 2)) + fg.rs)
                         print("RESULT-> ", fg.green + name + fg.rs)
                         print('distance:', distance_color)
+                        #Release video capture from identify class
+                        mirror_snapshot.video_capture.release()
+                        return name
                     else:
                         #We have more than one face to compare, we need to take a new screenshot
                         if i == 1:
@@ -60,9 +64,14 @@ app = Flask(__name__)
 @app.route("/", methods=['GET'])
 def index():
  #déclencheur
- launch()
- 
- 
+    name = launch()
+    print(name)
+    if name:
+        print("Launch Chromium & virtual mouse")
+        VirtualM = virtual.Mouse()
+        VirtualM.main()
+        print("CLOSE PROGRAM")
+        return "OK"
     
 if __name__ == "__main__":
  app.run(host="127.0.0.1", port=5500, debug=True)
