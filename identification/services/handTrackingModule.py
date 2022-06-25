@@ -1,4 +1,3 @@
-import time
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -7,6 +6,7 @@ import math
 
 class HandDetector :
     def __init__(self, mode=False, maxHand=2, modelComplexity=1, detectCon=0.5 ,trackCon=0.5):
+        
         self.mode = mode
         self.maxHand = maxHand
         self.modelComplex = modelComplexity
@@ -90,20 +90,3 @@ class HandDetector :
         length = math.hypot(x2 - x1, y2 - y1)
 
         return length,[x1, y1, x2, y2, cx, cy]
-
-def main():
-        cap = cv.VideoCapture(0)
-        detector=HandDetector()
-        while True:
-            sucess, img = cap.read()
-            detector.findhands(img)
-            lmLIST,bbox = detector.findPosition(img)
-
-            if len(lmLIST)!=0:
-                fingers = detector.fingersUp()
-                length,bbox = detector.findDistance(8,12,img)
-
-            #cv.imshow("res", img)
-
-if __name__ == '__main__':
-    main()

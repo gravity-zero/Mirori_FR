@@ -3,12 +3,14 @@ import identification as ident
 import auto_screenshot as ascreen
 from sty import fg
 import requests
+import time
 
 from os import path, system
 
 import sys
 #sys.path.append('../')
 from services import ssh_scp as conn, virtualmouse as virtual
+
 
 def launch(test=0):
     if test < 3:
@@ -23,7 +25,7 @@ def launch(test=0):
 
             mirror_snapshot.read()
             mirror_snapshot.analyse()
-            print("STARTING RECOGNIZE PROGRAM")
+            print("STARTING RECOGNIZE PROGRAM", flush=True)
             i = 1
             for name, distance in zip(mirror_snapshot.face_names, mirror_snapshot.face_distances):
                 if name != "Inconnu":
@@ -35,7 +37,8 @@ def launch(test=0):
                         print("RESULT-> ", fg.green + name + fg.rs)
                         print('distance:', distance_color)
                         #Release video capture from identify class
-                        mirror_snapshot.video_capture.release()
+                        mirror_snapshot.stop()
+                        print("SUCCESS", flush=True)
                         return name
                     else:
                         #We have more than one face to compare, we need to take a new screenshot
@@ -51,8 +54,6 @@ def launch(test=0):
                     print("RESULT-> ", fg.green + name + fg.rs)
                     print('distance:', distance_color)
                     launch(test+1)
-
-            print("ENDING RECOGNIZE PROGRAM")
             quit()
         else:
             print("SCREENSHOT ERROR")
@@ -65,16 +66,17 @@ app = Flask(__name__)
 def index():
  #déclencheur
     name = launch()
-    print(name)
+    print(name, flush=True)
     if name:
-        print("Launch Chromium & virtual mouse")
+        print("Launch Chromium & virtual mouse", flush=True)
         VirtualM = virtual.Mouse()
+        print("aller on commence", flush=True)
         VirtualM.main()
-        print("CLOSE PROGRAM")
+        print("CLOSE PROGRAM", flush=True)
         return "OK"
     
 if __name__ == "__main__":
  app.run(host="127.0.0.1", port=5500, debug=True)
 
-system("curl -G http://127.0.0.1:5500")
+#system("curl -G http://127.0.0.1:5500")
 

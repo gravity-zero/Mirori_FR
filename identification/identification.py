@@ -1,5 +1,5 @@
 import face_recognition
-from cv2 import VideoCapture, FONT_HERSHEY_DUPLEX, resize
+from cv2 import VideoCapture, FONT_HERSHEY_DUPLEX, resize, destroyAllWindows
 import numpy as np
 import os
 from sty import fg, RgbFg, Style
@@ -52,6 +52,10 @@ class identify:
                     continue
                 break
             self.frame = np.array(color_frame.get_data())
+
+    def stop(self):
+        self.video_capture.release()
+        destroyAllWindows()
 
     def analyse(self):
         frame = self.frame

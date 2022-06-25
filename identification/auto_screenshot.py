@@ -1,5 +1,5 @@
 
-from cv2 import VideoCapture, imwrite, destroyAllWindows, CAP_V4L2
+from cv2 import VideoCapture, imwrite, destroyAllWindows
 import time
 import face_recognition
 import os
@@ -7,7 +7,7 @@ import os
 
 def screenshot():
     #print(cv2.getBuildInformation())
-    video_capture = VideoCapture(CAP_V4L2)
+    video_capture = VideoCapture(0)
 
     face_locations = []
 
@@ -32,5 +32,7 @@ def screenshot():
         imwrite(filename, frame)
         video_capture.release()
         destroyAllWindows()
-        return "SCREENSHOT TAKEN"
+        break
+
+    return "SCREENSHOT TAKEN"
         

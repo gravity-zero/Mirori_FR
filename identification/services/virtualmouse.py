@@ -1,15 +1,16 @@
-from cv2 import VideoCapture, destroyAllWindows, CAP_V4L2, flip, FILLED, circle
+from cv2 import VideoCapture, destroyAllWindows, CAP_V4L2, flip, FILLED, circle, imshow
 import numpy as np
-import autopy
+from autopy import screen, mouse as Amouse
 from services import handTrackingModule as htm
 import os
 from datetime import datetime, timedelta
+import sys
 
 class Mouse:
 
     def __init__(self):
-        self.wScr, self.hScr = autopy.screen.size()
         self.cap = VideoCapture(0)
+        self.wScr, self.hScr = #screen.size()
         self.wCam = 640
         self.hCam = 480
         self.frameR = 150
@@ -21,6 +22,7 @@ class Mouse:
         self.detector = htm.HandDetector()
 
     def Mouse(self, img):
+        
         # finding hands
         self.detector.findhands(img)
         lmlist, bbox = self.detector.findPosition(img)
@@ -34,46 +36,54 @@ class Mouse:
             # 4. index: moving mode
             if fingers[1] == 1 and fingers[2] == 0:
                 # 5. cordinates the position (cam :640*480) to (screen :2560 × 1600)
-                xMOUSE = np.interp(Xindex, (self.frameR, self.wCam - self.frameR), (0, self.wScr))
+                xMOUSE = np.interp(Xindex, [self.frameR, self.wCam - self.frameR], [0, self.wScr])
                 yMOUSE = np.interp(Yindex, (self.frameR, self.hCam - self.frameR), (0, self.hScr))
+                # print(xMOUSE)
+                # print(yMOUSE)
+                
                 # 6. smoothen value
-                clocX = self.plocX + (xMOUSE - self.plocX) / self.smootheing
-                clocY = self.plocY + (yMOUSE - self.plocY) / self.smootheing
+                self.clocX = self.plocX + (xMOUSE - self.plocX) / self.smootheing
+                self.clocY = self.plocY + (yMOUSE - self.plocY) / self.smootheing
+                # print(self.clocX)
+                # print(self.clocY)
                 # 7. move mouse
-                autopy.mouse.move(clocX, clocY)
+                Amouse.move(self.clocX, self.clocY)
 
                 circle(img, (Xindex, Yindex), 15, (20, 180, 90), FILLED)
                 self.plocY, self.plocX = self.clocY, self.clocX
-
+                # print(self.plocX)
+                # print(self.plocY)
             # 8. both are up : cliking mode
             if fingers[1] == 1 and fingers[2] == 1:
                 # 9. finding distance
                 length, bbox = self.detector.findDistance(8, 12, img)
                 # 10. click if distance was short
                 if length < 40:
-                    autopy.mouse.click()
+                    Amouse.click()
         return img
 
 
     def main(self):
-        
-        timer = datetime.now() + timedelta(seconds=10)
-        while True:
-            now = datetime.now()
-            sucess, img = self.cap.read()
-            img = flip(img, 1)
-            img = self.Mouse(img)
-            
-            
-            print("10sec wait")
-            if timer < now:
-                print("CLOSE VM")
-                self.stop()
-                break
-        return "success"
+        if self.cap.isOpened():
+            timer = datetime.now() + timedelta(seconds=30)
+            self.cap.set(3, self.wCam)
+            self.cap.set(4, self.hCam)
+            while True:
+                now = datetime.now()
+                sucess, img = self.cap.read()
+                #imshow("result", img)
+                img = flip(img, 1)
+                img = self.Mouse(img)
+                
+                if timer < now:
+                    print("CLOSE VM")
+                    self.stop()
+                    break
+            return "success"
+        else:
+            return "Pas de cam"
 
     def stop(self):
-        #self.detector.cap.release()
         self.cap.release()
         destroyAllWindows()
         
