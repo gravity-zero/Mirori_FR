@@ -10,7 +10,7 @@ class Mouse:
 
     def __init__(self):
         self.cap = VideoCapture(0)
-        self.wScr, self.hScr = #screen.size()
+        self.wScr, self.hScr = screen.size()
         self.wCam = 640
         self.hCam = 480
         self.frameR = 150
