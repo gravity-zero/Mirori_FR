@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 load_dotenv("../.env")
 
 mySSHP = getenv('ssh_keygen')
-mySSHK = path.relpath('../../../../.ssh/ovh.pub')
+
+mySSHK = path.abspath('/home/grav/.ssh/ovh')
 
 def ssh_connection():
     ssh_client = SSHClient()
@@ -40,11 +41,10 @@ def scp_upload(file_to_move, path_to_directory='./mirori_faces/'):
 def scp_download(file_to_dl, directory):
     if file_to_dl.find('*') != -1:
         files = ssh_command("ls "+file_to_dl)
-        i=0
-        for file in files.split("\n"):
+        for path_to_file in files.split("\n"):
             scp = scp_connection()
-            scp.get(file, directory)
-            i+=1
+            file = path_to_file.split("/")[1]
+            scp.get(path_to_file, directory+file)
     else:
         scp = scp_connection()
-        scp.get(file_to_dl, directory)
+        scp.get(file_to_dl, directory+file_to_dl)

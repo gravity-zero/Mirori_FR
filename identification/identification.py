@@ -1,12 +1,12 @@
 import face_recognition
-import cv2
+from cv2 import VideoCapture, FONT_HERSHEY_DUPLEX, resize, destroyAllWindows
 import numpy as np
 import os
 from sty import fg, RgbFg, Style
 
 
 class identify:
-    font = cv2.FONT_HERSHEY_DUPLEX
+    font = FONT_HERSHEY_DUPLEX
     color = (255, 255, 255)
     fg.orange = Style(RgbFg(255, 150, 50))
 
@@ -28,7 +28,8 @@ class identify:
             quit()
         self.known_face_encodings = np.load(embedding_file)
         self.known_face_names = np.load(name_file)
-        print("Fichiers Trouvés", embedding_file, name_file)
+        print("Fichiers Trouvés", embedding_file, name_file, flush=True)
+
 
         if entree.split(':')[0] == "file_location":
             fichier = entree.split(':')[1]
@@ -36,7 +37,7 @@ class identify:
             if not os.path.exists(fichier):
                 print("Fichier", fichier, "non trouvé")
                 quit()
-            self.video_capture = cv2.VideoCapture(fichier)
+            self.video_capture = VideoCapture(fichier)
         else:
             print("Entree inconnue")
             quit()
@@ -44,8 +45,10 @@ class identify:
     def read(self):
         if self.video_capture is not None:
             ret, self.frame = self.video_capture.read()
+            print("pass 1.0",flush=True)
         else:
             while True:
+                print("pass 1.1",flush=True)
                 frames = self.pipeline.wait_for_frames()
                 color_frame = frames.get_color_frame()
                 if not color_frame:
@@ -53,23 +56,34 @@ class identify:
                 break
             self.frame = np.array(color_frame.get_data())
 
+    def stop(self):
+        self.video_capture.release()
+        destroyAllWindows()
+
     def analyse(self):
-        frame = self.frame
-        if (frame is not None) and (frame.shape[1] > self.width_max):
-            self.ratio = self.width_max / frame.shape[1]
-            frame_to_analyse = cv2.resize(frame, (0, 0), fx=self.ratio, fy=self.ratio)
+        if (self.frame is not None) and (self.frame.shape[1] > self.width_max):
+            print("pass 2.0",flush=True)
+            self.ratio = self.width_max / self.frame.shape[1]
+            frame_to_analyse = resize(self.frame, (0, 0), fx=self.ratio, fy=self.ratio)
         else:
+            print("pass 2.1",flush=True)
             self.ratio = 1
-            frame_to_analyse = frame
+            frame_to_analyse = self.frame
 
         self.face_locations = face_recognition.face_locations(frame_to_analyse)
         face_encodings = face_recognition.face_encodings(frame_to_analyse, self.face_locations)
         self.face_names = []
         self.face_distances = []
+        
         for face_encoding in face_encodings:
+            matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
             distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
+            print(np.min(distances), flush=True)
             if np.min(distances) < self.tolerance:
                 best_match_index = np.argmin(distances)
+                #if len(self.known_face_encodings) < best_match_index and len(self.known_face_encodings) == 1:
+                 #   name = self.known_face_names[0]
+                #else:
                 name = self.known_face_names[best_match_index]
             else:
                 name = "Inconnu"
