@@ -2,27 +2,54 @@ from flask import Flask
 import identification as ident
 import auto_screenshot as ascreen
 from sty import fg
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-
-from os import path, system
-
-import sys 
+from os import path, system, getenv
 #sys.path.append('../')
-from services import ssh_scp as conn, virtualmouse as virtual
-
+from services import ssh_scp as conn, virtualmouse as virtual, browser as bi
 import screen_brightness_control as sbc 
+from dotenv import load_dotenv
+import requests
+import time
 
-chrome_options = Options()
-#chrome_options.add_argument("--user-data-dir=/home/grav/snap/chromium/common/chromium/Default")
-
-#chrome_options.add_argument("--kiosk")
-chrome_options.add_experimental_option("excludeSwitches", ['enable-automation']) #Disable banner message 
-BROWSER = webdriver.Chrome(chrome_options=chrome_options)
-BROWSER.get('https://gravity-zero.fr')
-# BROWSER.quit() #Close the Browser
+load_dotenv("/home/grav/Bureau/Mirori_FR/.env")
 #sbc.set_brightness(0)
 
+def waiting_route():
+    return getenv("front_route") + "visitors/standbyMode"
+
+def fr_in_progress():
+    return getenv("front_route") + "visitors/facialRecognitionLoading"
+
+def fr_failed_qr_code():
+    return getenv("front_route") + "visitors/facialRecognitionFailed"
+
+def api_call(user_id):
+    back_route = getenv("back_route")
+    api_key = getenv("api_key")
+    data = {"id": user_id, "api_key": api_key}
+    composed_route = back_route + "auth/login"
+    response = requests.post(composed_route, data=data)
+
+    if response.status_code != 200:
+        print("Erreur avec l'API, email inconnue ?", response, flush=True)
+        exit()
+
+    res = response.json()
+
+    if not res["token"]:
+        print("API DON'T RETURN Token, response: ", res, flush=True)
+        exit()
+
+    jwt_token = res["token"]
+    print(jwt_token, flush=True)
+    return jwt_token
+
+print("Start chromium_instance")
+global browser
+browser = bi.chromium_instance() # We close all existents instance & start new one
+browser.get(waiting_route())
+
+def open_cms(jwt):
+    browser.get(getenv("front_route")+jwt)
 
 def launch(test=0):
     if test < 3:
@@ -32,9 +59,9 @@ def launch(test=0):
         
         if result is not None:
             #We need to init this program from the program where we take the screenshot sample
-            conn.scp_download('mirori_faces/*', path.abspath("/home/grav/Bureau/Mirori_FR/npy_files")+"/")
-            mirror_snapshot = ident.identify("file_location:/home/grav/Bureau/Mirori_FR/identification/images_to_test/identity.png", "/home/grav/Bureau/Mirori_FR/npy_files/face_encodings.npy", "/home/grav/Bureau/Mirori_FR/npy_files/face_names.npy")
-
+            conn.scp_download('mirori_faces/*', "/home/grav/Bureau/Mirori_FR/identification/npy_files/")
+            mirror_snapshot = ident.identify("file_location:/home/grav/Bureau/Mirori_FR/identification/images_to_test/identity.jpeg", "/home/grav/Bureau/Mirori_FR/identification/npy_files/face_encodings.npy", "/home/grav/Bureau/Mirori_FR/identification/npy_files/face_names.npy")
+           
             mirror_snapshot.read()
             mirror_snapshot.analyse()
             print("STARTING RECOGNIZE PROGRAM", flush=True)
@@ -46,8 +73,8 @@ def launch(test=0):
                         distance_color = fg.orange + str(round(distance, 2)) + fg.rs if distance > 0.5 else (
                             fg.yellow + str(round(distance, 2)) + fg.rs if distance > 0.4 else fg.green + str(
                                 round(distance, 2)) + fg.rs)
-                        print("RESULT-> ", fg.green + name + fg.rs)
-                        print('distance:', distance_color)
+                        print("RESULT-> ", fg.green + name + fg.rs, flush=True)
+                        print('distance:', distance_color, flush=True)
                         #Release video capture from identify class
                         mirror_snapshot.stop()
                         print("SUCCESS", flush=True)
@@ -55,54 +82,66 @@ def launch(test=0):
                     else:
                         #We have more than one face to compare, we need to take a new screenshot
                         if i == 1:
-                            print(fg.red + "ERROR MORE THAN ONE FACE TO COMPARE" + fg.rs)
-                        print("RESULT "+str(i)+":", fg.green + name + fg.rs if name != "Inconnu" else fg.red + name + fg.rs)
+                            print(fg.red + "ERROR MORE THAN ONE FACE TO COMPARE" + fg.rs, flush=True)
+                        print("RESULT "+str(i)+":", fg.green + name + fg.rs if name != "Inconnu" else fg.red + name + fg.rs, flush=True)
                         i += 1
                         launch(test+1)
                 else:
                     distance_color = fg.orange + str(round(distance, 2)) + fg.rs if distance > 0.5 else (
                             fg.yellow + str(round(distance, 2)) + fg.rs if distance > 0.4 else fg.green + str(
                                 round(distance, 2)) + fg.rs)
-                    print("RESULT-> ", fg.green + name + fg.rs)
-                    print('distance:', distance_color)
+                    print("RESULT-> ", fg.green + name + fg.rs, flush=True)
+                    print('distance:', distance_color, flush=True)
                     launch(test+1)
             quit()
         else:
-            print("SCREENSHOT ERROR")
+            print("SCREENSHOT ERROR", flush=True)
+            launch(test+1)
     else:
-        print("MESSAGE QR Code")
-
+        print("MESSAGE QR Code", flush=True)
+        browser.get(fr_failed_qr_code())
+        return False
+        
 
 app = Flask(__name__)
 @app.route("/", methods=['GET'])
 def index():
- #déclencheur
-    name = launch()
-    sbc.fade_brightness(100, increment=20, interval=0.03)
+    #sbc.fade_brightness(100, increment=20, interval=0.5)
+    #chome fr in progress
+    browser.get(fr_in_progress())
+    #déclencheur
+    id = launch()
+    print(id, flush=True)
+    if id:
+        jwt = api_call(id) #if fail return QRCODE
+        open_cms(jwt)
+        
+        return "OK"
+    return "QRCODE"
 
-    print(name, flush=True)
-    return name
-    # if name:
-    #     print("Launch Chromium & virtual mouse", flush=True)
-    #     VirtualM = virtual.Mouse()
-    #     print("aller on commence", flush=True)
-    #     VirtualM.main()
-    #     print("CLOSE PROGRAM", flush=True)
-    #     return "OK"
-
-@app.route("/user_experience", methods=['GET'])
-def start_user_experience():
+@app.route("/virtual_mouse", methods=['GET'])
+def vm_start():
+    print("Virtual mouse", flush=True)
+    global VirtualM
     VirtualM = virtual.Mouse()
     VirtualM.main()
-    return "run"
+
+@app.route("/waiting_mode", methods=['GET'])
+def waiting_page():
+    browser.get(waiting_route())
+    return "WAITING PAGE"
+
+@app.route("/default_qr_code", methods=['GET'])
+def def_qr_code():
+    browser.get(fr_failed_qr_code())
+    return "QR CODE LAUNCHED"
 
 @app.route("/user_finished", methods=['GET'])
 def stop_user_experience():
-    VirtualM = virtual.Mouse() #Create new instance, this is a bad way to kill process
-    VirtualM.stop() #kill process
+    global VirtualM # we use global for get instance of virtual mouse
+    VirtualM.stop() # kill process
+    return "STOP"
     
 if __name__ == "__main__":
  app.run(host="127.0.0.1", port=5500, debug=True)
-
-#system("curl -G http://127.0.0.1:5500")
 
