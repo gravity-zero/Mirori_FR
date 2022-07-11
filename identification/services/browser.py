@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 import http.client as httplib
 import socket
 from os import system 
+import subprocess
 
 def launch_chromium():
     chrome_options = Options()
@@ -23,13 +24,22 @@ def get_current_url(browser):
     return browser.current_url
 
 def kill_Chromium_process():
-    system("while pgrep chrome ; do pkill chrome ; done")
+    #system("while pgrep chrome ; do pkill chrome ; done")
+    #subprocess.run("while pgrep chrome ; do pkill chrome ; done", capture_output=False, shell=False)
+    system("killall chrome")
+    return True
+
 
 def chromium_instance():
-    nb_instance = system("ps aux | grep chrome | wc -l")
-    if nb_instance == 1:
-        return launch_chromium()
-    if nb_instance >= 12:
+    cmd = "ps aux | pgrep chrome | wc -l"
+    exec_cmd = subprocess.run(cmd, capture_output=True, shell=True)
+    nb_instance= int(exec_cmd.stdout.decode())
+    
+    print("NB instance =", nb_instance, flush=True)
+    if nb_instance >= 21:
+        print("Kill Chromium", flush=True)
         kill_Chromium_process()
-        return chromium_instance()
+    
+    return launch_chromium()
+    
     

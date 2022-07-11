@@ -38,21 +38,15 @@ class Mouse:
                 # 5. cordinates the position (cam :640*480) to (screen :2560 × 1600)
                 xMOUSE = np.interp(Xindex, [self.frameR, self.wCam - self.frameR], [0, self.wScr])
                 yMOUSE = np.interp(Yindex, (self.frameR, self.hCam - self.frameR), (0, self.hScr))
-                # print(xMOUSE)
-                # print(yMOUSE)
                 
                 # 6. smoothen value
                 self.clocX = self.plocX + (xMOUSE - self.plocX) / self.smootheing
                 self.clocY = self.plocY + (yMOUSE - self.plocY) / self.smootheing
-                # print(self.clocX)
-                # print(self.clocY)
                 # 7. move mouse
                 Amouse.move(self.clocX, self.clocY)
 
                 circle(img, (Xindex, Yindex), 15, (20, 180, 90), FILLED)
                 self.plocY, self.plocX = self.clocY, self.clocX
-                # print(self.plocX)
-                # print(self.plocY)
             # 8. both are up : cliking mode
             if fingers[1] == 1 and fingers[2] == 1:
                 # 9. finding distance
@@ -65,21 +59,20 @@ class Mouse:
 
     def main(self):
         if self.cap.isOpened():
-            timer = datetime.now() + timedelta(seconds=30)
+            #timer = datetime.now() + timedelta(seconds=30)
             self.cap.set(3, self.wCam)
             self.cap.set(4, self.hCam)
             while True:
-                now = datetime.now()
+                #now = datetime.now()
                 sucess, img = self.cap.read()
-                #imshow("result", img)
                 img = flip(img, 1)
                 img = self.Mouse(img)
                 
-                if timer < now:
-                    print("CLOSE VM")
-                    self.stop()
-                    break
-            return "success"
+            #     if timer < now:
+            #         print("CLOSE VM")
+            #         self.stop()
+            #         break
+            # return "success"
         else:
             return "Pas de cam"
 
