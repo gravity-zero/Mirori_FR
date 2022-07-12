@@ -45,10 +45,8 @@ class identify:
     def read(self):
         if self.video_capture is not None:
             ret, self.frame = self.video_capture.read()
-            print("pass 1.0",flush=True)
         else:
             while True:
-                print("pass 1.1",flush=True)
                 frames = self.pipeline.wait_for_frames()
                 color_frame = frames.get_color_frame()
                 if not color_frame:
@@ -62,11 +60,9 @@ class identify:
 
     def analyse(self):
         if (self.frame is not None) and (self.frame.shape[1] > self.width_max):
-            print("pass 2.0",flush=True)
             self.ratio = self.width_max / self.frame.shape[1]
             frame_to_analyse = resize(self.frame, (0, 0), fx=self.ratio, fy=self.ratio)
         else:
-            print("pass 2.1",flush=True)
             self.ratio = 1
             frame_to_analyse = self.frame
 
@@ -81,10 +77,10 @@ class identify:
             print(np.min(distances), flush=True)
             if np.min(distances) < self.tolerance:
                 best_match_index = np.argmin(distances)
-                #if len(self.known_face_encodings) < best_match_index and len(self.known_face_encodings) == 1:
-                 #   name = self.known_face_names[0]
-                #else:
-                name = self.known_face_names[best_match_index]
+                if len(self.known_face_encodings) < best_match_index and len(self.known_face_encodings) == 1:
+                   name = self.known_face_names[0]
+                else:
+                    name = self.known_face_names[best_match_index]
             else:
                 name = "Inconnu"
             self.face_names.append(name)

@@ -2,16 +2,12 @@ from flask import Flask
 import identification as ident
 import auto_screenshot as ascreen
 from sty import fg
-from os import path, system, getenv
-#sys.path.append('../')
+from os import getenv
 from services import ssh_scp as conn, virtualmouse as virtual, browser as bi
-import screen_brightness_control as sbc 
 from dotenv import load_dotenv
 import requests
-import time
 
 load_dotenv("/home/grav/Bureau/Mirori_FR/.env")
-#sbc.set_brightness(0)
 
 def waiting_route():
     return getenv("front_route") + "visitors/standbyMode"
@@ -31,13 +27,13 @@ def api_call(user_id):
 
     if response.status_code != 200:
         print("Erreur avec l'API, email inconnue ?", response, flush=True)
-        exit()
+        return False
 
     res = response.json()
 
     if not res["token"]:
         print("API DON'T RETURN Token, response: ", res, flush=True)
-        exit()
+        return False
 
     jwt_token = res["token"]
     print(jwt_token, flush=True)
@@ -49,7 +45,7 @@ browser = bi.chromium_instance() # We close all existents instance & start new o
 browser.get(waiting_route())
 
 def open_cms(jwt):
-    browser.get(getenv("front_route")+jwt)
+    browser.get(getenv("front_route")+"visitors/authFacialRecognition/"+jwt)
 
 def launch(test=0):
     if test < 3:
@@ -106,18 +102,21 @@ def launch(test=0):
 app = Flask(__name__)
 @app.route("/", methods=['GET'])
 def index():
-    #sbc.fade_brightness(100, increment=20, interval=0.5)
+    #
     #chome fr in progress
     browser.get(fr_in_progress())
     #déclencheur
     id = launch()
     print(id, flush=True)
-    if id:
-        jwt = api_call(id) #if fail return QRCODE
-        open_cms(jwt)
-        
-        return "OK"
-    return "QRCODE"
+    if not id:
+        return "QRCODE"
+    jwt = api_call(id) #if fail return QRCODE
+    if not jwt:
+        return "QRCODE"
+    open_cms(jwt)
+    return "OK"
+
+    
 
 @app.route("/virtual_mouse", methods=['GET'])
 def vm_start():
@@ -139,7 +138,9 @@ def def_qr_code():
 @app.route("/user_finished", methods=['GET'])
 def stop_user_experience():
     global VirtualM # we use global for get instance of virtual mouse
-    VirtualM.stop() # kill process
+    VirtualM.stop() # kill process get error
+    del VirtualM
+    #sbc.set_brightness(0)
     return "STOP"
     
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import subprocess
 
 def launch_chromium():
     chrome_options = Options()
-    #chrome_options.add_argument("--kiosk")
+    chrome_options.add_argument("--kiosk")
     chrome_options.add_experimental_option("excludeSwitches", ['enable-automation']) #Disable banner message 
     browser = webdriver.Chrome(options=chrome_options)
     return browser

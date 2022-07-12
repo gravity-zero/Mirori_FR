@@ -59,24 +59,20 @@ class Mouse:
 
     def main(self):
         if self.cap.isOpened():
-            #timer = datetime.now() + timedelta(seconds=30)
             self.cap.set(3, self.wCam)
             self.cap.set(4, self.hCam)
             while True:
-                #now = datetime.now()
                 sucess, img = self.cap.read()
                 img = flip(img, 1)
                 img = self.Mouse(img)
-                
-            #     if timer < now:
-            #         print("CLOSE VM")
-            #         self.stop()
-            #         break
-            # return "success"
         else:
             return "Pas de cam"
 
     def stop(self):
         self.cap.release()
+        self.cap = None
         destroyAllWindows()
+
+    def __del__(self):
+        print("vm killed")
         
