@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timedelta
 import RPi.GPIO as GPIO
 import requests
-import screen_brightness_control as sbc
+#import screen_brightness_control as sbc
 
 
 GPIO.setmode(GPIO.BCM)
@@ -35,7 +35,7 @@ GPIO.setup(Trig,GPIO.OUT)
 GPIO.setup(Echo,GPIO.IN)
 GPIO.output(Trig, False)
 
-sbc.set_brightness(1000)
+#sbc.set_brightness(1000)
 
 stop_count=0
 start_count=0
@@ -69,7 +69,7 @@ while (True):
 
     if distance < 150.00 and start_count > 1 and not started:
         print("START FR", flush=True)
-        sbc.fade_brightness(100, increment=20, interval=0.5)
+        #sbc.fade_brightness(100, increment=20, interval=0.5)
         value = start_FR()
 
         if value.text == "OK":
@@ -94,7 +94,7 @@ while (True):
         stop_count=0
         start_count=0
         started=False
-        sbc.set_brightness(0)
+        #sbc.set_brightness(0)
         time.sleep(10)
         timer = datetime.now() + timedelta(seconds=36000)
 
