@@ -40,6 +40,9 @@ or
 <b>Mohammadst99 repo:</b><br>
 - [Virtual Mouse](https://github.com/mohammadst99/VirtualMouse_openCV)
 
+<b>SR04 Instructions:</b><br>
+- [TUTO FR](https://raspberry-lab.fr/Composants/Mesure-de-distance-avec-HC-SR04-Raspberry-Francais/)
+
  ### [ PROBLEMS ]
  OpenCV function imshow segfault. [GITHUB ISSUE](https://github.com/opencv/opencv-python/issues/572) <br>
  RESOLUTION: remove opencv installation with apt & install the github version.
