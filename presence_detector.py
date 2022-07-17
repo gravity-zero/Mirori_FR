@@ -90,7 +90,7 @@ while (True):
     if stop_count > 10:
         print("STOP VM", flush=True)
         kill_VM()
-        waiting_mode
+        waiting_mode()
         stop_count=0
         start_count=0
         started=False

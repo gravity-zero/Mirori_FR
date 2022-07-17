@@ -50,17 +50,17 @@ def open_cms(jwt):
 def launch(test=0):
     if test < 3:
         #We take a screenshot
-        
         result = ascreen.screenshot()
         
         if result is not None:
-            #We need to init this program from the program where we take the screenshot sample
+            #Get the npy files from server
             conn.scp_download('mirori_faces/*', "/home/grav/Bureau/Mirori_FR/identification/npy_files/")
+            #Taking screenshot before comp
             mirror_snapshot = ident.identify("file_location:/home/grav/Bureau/Mirori_FR/identification/images_to_test/identity.jpeg", "/home/grav/Bureau/Mirori_FR/identification/npy_files/face_encodings.npy", "/home/grav/Bureau/Mirori_FR/identification/npy_files/face_names.npy")
-           
+            #Read & analyse the snapshot with npy files
+            print("STARTING RECOGNIZE PROGRAM", flush=True)
             mirror_snapshot.read()
             mirror_snapshot.analyse()
-            print("STARTING RECOGNIZE PROGRAM", flush=True)
             i = 1
             for name, distance in zip(mirror_snapshot.face_names, mirror_snapshot.face_distances):
                 if name != "Inconnu":
@@ -95,22 +95,19 @@ def launch(test=0):
             launch(test+1)
     else:
         print("MESSAGE QR Code", flush=True)
-        browser.get(fr_failed_qr_code())
         return False
         
 
 app = Flask(__name__)
 @app.route("/", methods=['GET'])
 def index():
-    #
-    #chome fr in progress
+    #chome facial recognition in progress
     browser.get(fr_in_progress())
-    #déclencheur
-    id = launch()
+    id = launch() #déclencheur
     print(id, flush=True)
     if not id:
         return "QRCODE"
-    jwt = api_call(id) #if fail return QRCODE
+    jwt = api_call(id) #if fail return False
     if not jwt:
         return "QRCODE"
     open_cms(jwt)
