@@ -41,7 +41,7 @@ or
 - [Virtual Mouse](https://github.com/mohammadst99/VirtualMouse_openCV)
 
  ### [ PROBLEMS ]
- OpenCV function imshow segfault. FOUND HERE: https://github.com/opencv/opencv-python/issues/572 
+ OpenCV function imshow segfault. [GITHUB ISSUE](https://github.com/opencv/opencv-python/issues/572) <br>
  RESOLUTION: remove opencv installation with apt & install the github version.
 
   FOR OPENCV 4.5.5 version from github official repo you need to use cmake with a flag: <br>
